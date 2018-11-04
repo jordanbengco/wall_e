@@ -6,7 +6,7 @@ from helper_files.embed import embed
 from helper_files.Paginate import paginateEmbed
 import helper_files.settings as settings
 import json
-from main import wolframAPI, wolframClient
+from main import wolframAPI
 import discord.client
 import urllib.parse
 

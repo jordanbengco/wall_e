@@ -14,7 +14,6 @@ import helper_files.settings as settings
 from helper_files.embed import embed
 import re
 import json
-import wolframalpha
 
 ######################
 ## VARIABLES TO USE ##
@@ -48,7 +47,6 @@ if 'WOLFRAMAPI' not in os.environ:
     print("[main.py] No environment variable \"WOLFRAMAPI\" seems to exist...read the README again")
     exit(1)
 wolframAPI = os.environ['WOLFRAMAPI']
-wolframClient = wolframalpha.Client(wolframAPI)
 
 ##################
 ## LOGGING SETUP ##
