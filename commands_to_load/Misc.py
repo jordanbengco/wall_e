@@ -118,7 +118,7 @@ class Misc():
             ('input', arg),
             ('format', 'plaintext'),
             ('output', 'json'),
-            ('podindex', '1'),
+            ('podtitle', 'Result'),
             ('latlong', '49.276765,-122.917957')
         ]
 
