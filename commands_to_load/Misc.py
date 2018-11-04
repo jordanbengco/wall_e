@@ -131,7 +131,7 @@ class Misc():
 					'https://api.wolframalpha.com/v2/query',
 					params=inputs) as res:
 				if res.status == 200:
-					json_res = await res.json()
+					json_res = await res.json(content_type=None)
 					text_res = json_res['queryresult']['pods'][0]['subpods'][0]['plaintext']
 					text = "`" + text_res + "`" + "\n\n[Link](%s)" % human_url
 					logger.info("[Misc wolfram()] result found for %s" % arg)
