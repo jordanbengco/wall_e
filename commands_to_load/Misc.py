@@ -131,14 +131,18 @@ class Misc():
 					params=inputs) as res:
 				if res.status == 200:
 					json_res = await res.json(content_type=None) # bypass check: wolfram doesnt set content-type to json
-					text_res = '\n'.join([
-                        subpod['plaintext']
-                        for pod
-                        in json_res['queryresult']['pods']
-                        if pod['title'] == 'Result' or pod.get('primary', False) == True
-                        for subpod
-                        in pod['subpods']
-                    ])
+					if not json_res['queryresult']['success'] or not json_res['queryresult']['numpods']:
+						text_res = 'Query not specific enough' # vague queries will return a fail response or no pods
+					else:
+						text_res = '\n'.join([
+							subpod['plaintext'] # get the plaintext answers of all the subpods
+							for pod # of all pods
+							in json_res['queryresult']['pods']
+							if pod['numsubpods'] and # which have at least 1 subpod and
+							   (pod['title'] == 'Result' or pod.get('primary', False)) # are result or primary pods
+							for subpod
+							in pod['subpods']
+						])
 					text = "`" + text_res + "`" + "\n\n[Link](%s)" % human_url
 					logger.info("[Misc wolfram()] result found for %s" % arg)
 				else:
