@@ -9,7 +9,6 @@ import json
 from main import wolframAPI, wolframClient
 import discord.client
 import urllib.parse
-import itertools
 
 logger = logging.getLogger('wall_e')
 
@@ -114,9 +113,9 @@ class Misc():
 		logger.info("[Misc wolfram()] wolfram command detected from user "+str(ctx.message.author)+" with argument =\""+str(arg)+"\"")
 		logger.info("[Misc wolfram()] URL being contructed")
 
-		inputs = dict(i=arg)
-		app_id = dict(appid=wolframAPI)
-		data = itertools.chain(app_id.items(), inputs.items())
+		inputs = [('i', arg)]
+		app_id = [('appid', wolframAPI)]
+		data = inputs + app_id
 
 		human_query = urllib.parse.urlencode(inputs)
 		human_url = 'https://www.wolframalpha.com/input/?' + human_query
