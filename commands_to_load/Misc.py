@@ -135,7 +135,7 @@ class Misc():
                         subpod['plaintext']
                         for pod
                         in json_res['queryresult']['pods']
-                        if pod['title'] == 'Result' or pod['primary'] == True
+                        if pod['title'] == 'Result' or pod.get('primary', False) == True
                         for subpod
                         in pod['subpods']
                     ])
