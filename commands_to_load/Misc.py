@@ -1,12 +1,15 @@
 from discord.ext import commands
 import logging
 import requests as req
+import aiohttp
 from helper_files.embed import embed 
 from helper_files.Paginate import paginateEmbed
 import helper_files.settings as settings
 import json
 from main import wolframAPI, wolframClient
 import discord.client
+import urllib.parse
+import itertools
 
 logger = logging.getLogger('wall_e')
 
@@ -111,30 +114,26 @@ class Misc():
 		logger.info("[Misc wolfram()] wolfram command detected from user "+str(ctx.message.author)+" with argument =\""+str(arg)+"\"")
 		logger.info("[Misc wolfram()] URL being contructed")
 
-		commandURL = arg.replace("+", "%2B")
-		commandURL = commandURL.replace("(", "%28")
-		commandURL = commandURL.replace(")", "%29")
-		commandURL = commandURL.replace("[", "%5B")
-		commandURL = commandURL.replace("]", "%5D")
-		commandURL = commandURL.replace(" ", "+")
-		wolframURL = 'https://www.wolframalpha.com/input/?i=%s' % commandURL
+		inputs = dict(i=arg)
+		app_id = dict(appid=wolframAPI)
+		data = itertools.chain(app_id.items(), inputs.items())
 
-		logger.info("[Misc wolfram()] querying WolframAlpha for %s" % arg)
-		res = wolframClient.query(arg)
-		try:
-			content = [
-				['Results from Wolfram Alpha', "`" + next(res.results).text + "`" + "\n\n[Link](%s)" % wolframURL]
-				]
+		human_query = urllib.parse.urlencode(inputs)
+		human_url = 'https://www.wolframalpha.com/input/?' + human_query
+
+		async with aiohttp.request(
+				'GET',
+				'https://api.wolframalpha.com/v1/result',
+				params=data) as res:
+			if res.status == 200:
+				text = "`" + await res.text() + "`" + "\n\n[Link](%s)" % human_url
+				logger.info("[Misc wolfram()] result found for %s" % arg)
+			else:
+				text = "No results found. :thinking: \n\n[Link](%s)" % human_url
+				logger.error("[Misc wolfram()] result NOT found for %s" % arg)
+			content = [['Results from Wolfram Alpha', text]]
 			eObj = embed(author=settings.BOT_NAME, avatar=settings.BOT_AVATAR, colour=0xdd1100, content=content)
 			await ctx.send(embed=eObj)
-			logger.info("[Misc wolfram()] result found for %s" % arg)
-		except (AttributeError, StopIteration):
-			content = [
-				['Results from Wolfram Alpha', "No results found. :thinking: \n\n[Link](%s)" % wolframURL], 
-				]
-			eObj = embed(author=settings.BOT_NAME, avatar=settings.BOT_AVATAR, colour=0xdd1100, content=content)
-			await ctx.send(embed=eObj)
-			logger.error("[Misc wolfram()] result NOT found for %s" % arg)
 
 	@commands.command()
 	async def help(self, ctx):
