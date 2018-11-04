@@ -15,6 +15,7 @@ from helper_files.embed import embed
 import re
 import json
 import wolframalpha
+import aiohttp
 
 ######################
 ## VARIABLES TO USE ##
@@ -114,6 +115,7 @@ async def write_to_bot_log_channel():
     else:
         logger.info("[main.py write_to_bot_log_channel] bot_log channel with id " +str(BOT_LOG_CHANNEL) +" successfully retrieved.")
         while not bot.is_closed():
+            iteration_errors = 0
             f.flush()
             line = f.readline()
             while line:
@@ -128,7 +130,18 @@ async def write_to_bot_log_channel():
                         length = len(line)- (len(line) - 2000) #taking length of just output into account
                         length = length - len(prefix) #taking length of prefix into account
                         output=line[:length]
-                    await channel.send(output)
+                    try:
+                        await channel.send(output)
+                    except (aiohttp.ClientError, discord.HTTPException) as exc:
+                        iteration_errors += 1
+                        exc_str = '{}: {}'.format(type(exc).__name__, exc)
+                        logger.error('[main.py write_to_bot_log_channel] write to channel failed\n{}'.format(exc_str))
+                        if iteration_errors >= 3:
+                            logger.error('[main.py write_to_bot_log_channel] 3 fails writing msg to channel, giving up')
+                            raise
+                        else:
+                            await asyncio.sleep(10)
+                            continue
                 line = f.readline()
             await asyncio.sleep(1)
 
