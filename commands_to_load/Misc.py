@@ -121,8 +121,7 @@ class Misc():
 		human_query = urllib.parse.urlencode(inputs)
 		human_url = 'https://www.wolframalpha.com/input/?' + human_query
 
-		async with aiohttp.request(
-				'GET',
+		async with aiohttp.ClientSession().get(
 				'https://api.wolframalpha.com/v1/result',
 				params=data) as res:
 			if res.status == 200:
