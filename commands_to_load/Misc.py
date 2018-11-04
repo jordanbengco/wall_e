@@ -113,19 +113,27 @@ class Misc():
 		logger.info("[Misc wolfram()] wolfram command detected from user "+str(ctx.message.author)+" with argument =\""+str(arg)+"\"")
 		logger.info("[Misc wolfram()] URL being contructed")
 
-		inputs = [('i', arg)]
-		app_id = [('appid', wolframAPI)]
-		data = inputs + app_id
+		inputs = [
+            ('appid', wolframAPI),
+            ('input', arg),
+            ('format', 'plaintext'),
+            ('output', 'json'),
+            ('podindex', '1'),
+            ('latlong', '49.276765,-122.917957')
+        ]
 
-		human_query = urllib.parse.urlencode(inputs)
+		human_input = [('i', arg)]
+		human_query = urllib.parse.urlencode(human_input)
 		human_url = 'https://www.wolframalpha.com/input/?' + human_query
 
 		async with aiohttp.ClientSession() as session:
 			async with session.get(
-					'https://api.wolframalpha.com/v1/result',
-					params=data) as res:
+					'https://api.wolframalpha.com/v2/query',
+					params=inputs) as res:
 				if res.status == 200:
-					text = "`" + await res.text() + "`" + "\n\n[Link](%s)" % human_url
+					json_res = await res.json()
+					text_res = json_res['queryresult']['pods'][0]['subpods'][0]['plaintext']
+					text = "`" + text_res + "`" + "\n\n[Link](%s)" % human_url
 					logger.info("[Misc wolfram()] result found for %s" % arg)
 				else:
 					text = "No results found. :thinking: \n\n[Link](%s)" % human_url
