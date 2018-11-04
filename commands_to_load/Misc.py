@@ -129,7 +129,7 @@ class Misc():
 					logger.info("[Misc wolfram()] result found for %s" % arg)
 				else:
 					text = "No results found. :thinking: \n\n[Link](%s)" % human_url
-					logger.error("[Misc wolfram()] result NOT found for %s (Status Code %s)" % (arg, res.status))
+					logger.info("[Misc wolfram()] result NOT found for %s (Status Code %s)" % (arg, res.status))
 				content = [['Results from Wolfram Alpha', text]]
 				eObj = embed(author=settings.BOT_NAME, avatar=settings.BOT_AVATAR, colour=0xdd1100, content=content)
 				await ctx.send(embed=eObj)
