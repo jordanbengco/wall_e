@@ -116,23 +116,24 @@ class Misc():
 		inputs = [
             ('appid', wolframAPI),
             ('input', arg),
-            ('format', 'plaintext'),
-            ('output', 'json'),
-            ('podtitle', 'Result'),
-            ('latlong', '49.276765,-122.917957')
+            ('format', 'plaintext'), # no images
+            ('output', 'json'), # json rather than xml
+            ('podtitle', 'Result'), # get only the Result section of the output
+            ('latlong', '49.276765,-122.917957') # for a location-based question, use SFU location
         ]
 
-		human_input = [('i', arg)]
+		human_input = [('i', arg)] # build the link that will be displayed in the message
 		human_query = urllib.parse.urlencode(human_input)
 		human_url = 'https://www.wolframalpha.com/input/?' + human_query
 
-		async with aiohttp.ClientSession() as session:
+		headers = {'Accept-Language': 'en-CA,en-US;q=0.7,en;q=0.3'} # ask wolfram for en-CA date/time/unit formats
+		async with aiohttp.ClientSession(headers=headers) as session:
 			async with session.get(
 					'https://api.wolframalpha.com/v2/query',
 					params=inputs) as res:
 				if res.status == 200:
-					json_res = await res.json(content_type=None)
-					text_res = json_res['queryresult']['pods'][0]['subpods'][0]['plaintext']
+					json_res = await res.json(content_type=None) # bypass check: wolfram doesnt set content-type to json
+					text_res = json_res['queryresult']['pods'][0]['subpods'][0]['plaintext'] # get text of result pod
 					text = "`" + text_res + "`" + "\n\n[Link](%s)" % human_url
 					logger.info("[Misc wolfram()] result found for %s" % arg)
 				else:
