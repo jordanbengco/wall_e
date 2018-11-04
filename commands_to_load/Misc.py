@@ -120,18 +120,19 @@ class Misc():
 		human_query = urllib.parse.urlencode(inputs)
 		human_url = 'https://www.wolframalpha.com/input/?' + human_query
 
-		async with aiohttp.ClientSession().get(
-				'https://api.wolframalpha.com/v1/result',
-				params=data) as res:
-			if res.status == 200:
-				text = "`" + await res.text() + "`" + "\n\n[Link](%s)" % human_url
-				logger.info("[Misc wolfram()] result found for %s" % arg)
-			else:
-				text = "No results found. :thinking: \n\n[Link](%s)" % human_url
-				logger.error("[Misc wolfram()] result NOT found for %s" % arg)
-			content = [['Results from Wolfram Alpha', text]]
-			eObj = embed(author=settings.BOT_NAME, avatar=settings.BOT_AVATAR, colour=0xdd1100, content=content)
-			await ctx.send(embed=eObj)
+		async with aiohttp.ClientSession() as session:
+			async with session.get(
+					'https://api.wolframalpha.com/v1/result',
+					params=data) as res:
+				if res.status == 200:
+					text = "`" + await res.text() + "`" + "\n\n[Link](%s)" % human_url
+					logger.info("[Misc wolfram()] result found for %s" % arg)
+				else:
+					text = "No results found. :thinking: \n\n[Link](%s)" % human_url
+					logger.error("[Misc wolfram()] result NOT found for %s" % arg)
+				content = [['Results from Wolfram Alpha', text]]
+				eObj = embed(author=settings.BOT_NAME, avatar=settings.BOT_AVATAR, colour=0xdd1100, content=content)
+				await ctx.send(embed=eObj)
 
 	@commands.command()
 	async def help(self, ctx):
